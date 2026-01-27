@@ -1,6 +1,5 @@
 package com.mdia.platform.auth.service;
 
-import com.mdia.platform.auth.controller.AuthController;
 import com.mdia.platform.auth.user.AppUser;
 import com.mdia.platform.auth.user.AppUserRepository;
 import org.springframework.beans.factory.annotation.Value;
