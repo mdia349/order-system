@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/authdb
+    username: auth
+    password: authpass
+  flyway:
+    enabled: true
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+app:
+  jwt:
+    issuer: "portfolio-platform"
+    secret: "a_super_long_random_secret_string_at_least_32_chars"
+    accessTokenMinutes: 30
