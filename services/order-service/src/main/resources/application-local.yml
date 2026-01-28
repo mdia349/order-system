@@ -10,7 +10,13 @@ spring:
     enabled: true
   kafka:
     bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
 
 app:
   jwt:
     secret: "a_super_long_random_secret_string_at_least_32_chars"
+
+  kafka:
+    ordersTopic: "orders.events"
