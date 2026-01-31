@@ -36,9 +36,12 @@ public class OrderService {
             payload = objectMapper.writeValueAsString(Map.of(
                     "eventId", UUID.randomUUID().toString(),
                     "eventType", "OrderCreated",
+                    "aggregateType", "Order",
                     "aggregateId", orderId.toString(),
                     "occurredAt", Instant.now().toString(),
-                    "userId", userId.toString()
+                    "data", Map.of(
+                            "userId", userId.toString()
+                    )
             ));
         } catch (Exception e) {
             throw new RuntimeException(e);

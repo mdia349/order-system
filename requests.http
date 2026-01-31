@@ -9,3 +9,7 @@ POST http://localhost:8081/auth/login
 Content-Type: application/json
 
 {"email":"test2@example.com","password":"Password123!"}
+
+### Create Order
+POST http://localhost:8082/orders
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJwb3J0Zm9saW8tcGxhdGZvcm0iLCJzdWIiOiI1ZDg2OWNjMC03ODkwLTQ3MjQtYWM0OC04MjY0MzE3MTc4OTUiLCJleHAiOjE3Njk3NjY3MjcsImlhdCI6MTc2OTc2NDkyNywiZW1haWwiOiJ0ZXN0MkBleGFtcGxlLmNvbSIsInJvbGVzIjoiUk9MRV9VU0VSIn0.M_kdw6Qd2r6iRTvpgjVHcG6DUuoFIQ_Nx6elWro3Tjk
