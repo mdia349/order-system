@@ -6,6 +6,10 @@ import com.mdia.platform.inventoryservice.repo.InventoryRepository;
 import com.mdia.platform.inventoryservice.repo.ProcessedEventRepository;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Scope;
 import jakarta.transaction.Transactional;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
@@ -22,6 +26,7 @@ public class OrderEventsConsumer {
     private final InventoryRepository inventoryRepo;
     private final Counter consumed;
     private final Counter deduped;
+    private final Tracer tracer = GlobalOpenTelemetry.getTracer("inventory-service");
 
     public OrderEventsConsumer(ProcessedEventRepository processedRepo,
                                InventoryRepository inventoryRepo,
@@ -35,24 +40,31 @@ public class OrderEventsConsumer {
     @KafkaListener(topics = "${app.kafka.ordersTopic}", groupId = "inventory-service")
     @Transactional
     public void onMessage(String payload) throws Exception {
-        Map<?, ?> evt = mapper.readValue(payload, Map.class);
+        Span span = tracer.spanBuilder("inventory.consumeOrderEvent").startSpan();
+        try (Scope scope = span.makeCurrent()) {
+            Map<?, ?> evt = mapper.readValue(payload, Map.class);
 
-        UUID eventId = UUID.fromString((String) evt.get("eventId"));
+            UUID eventId = UUID.fromString((String) evt.get("eventId"));
+            span.setAttribute("event.id", eventId.toString());
 
-        if (processedRepo.existsById(eventId)) {
-            deduped.increment();
-            return;
+            if (processedRepo.existsById(eventId)) {
+                deduped.increment();
+                return;
+            }
+
+            consumed.increment();
+
+            String eventType = (String) evt.get("eventType");
+            span.setAttribute("event.type", eventType);
+            if ("OrderCreated".equals(eventType)) {
+                InventoryItem item = inventoryRepo.findById("SKU-CHAIR-1")
+                        .orElseThrow(() -> new IllegalStateException("MISSING SKU-CHAIR-1 SEED DATA"));
+                item.decrement(1);
+            }
+
+            processedRepo.save(new ProcessedEvent(eventId));
+        } finally {
+            span.end();
         }
-
-        consumed.increment();
-
-        String eventType = (String) evt.get("eventType");
-        if ("OrderCreated".equals(eventType)) {
-            InventoryItem item = inventoryRepo.findById("SKU-CHAIR-1")
-                    .orElseThrow(() -> new IllegalStateException("MISSING SKU-CHAIR-1 SEED DATA"));
-            item.decrement(1);
-        }
-
-        processedRepo.save(new ProcessedEvent(eventId));
     }
 }

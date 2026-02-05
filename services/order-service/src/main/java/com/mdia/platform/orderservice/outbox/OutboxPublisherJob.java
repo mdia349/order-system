@@ -3,6 +3,10 @@ package com.mdia.platform.orderservice.outbox;
 import com.mdia.platform.orderservice.entity.OutboxEvent;
 import com.mdia.platform.orderservice.kafka.OutboxKafkaPublisher;
 import com.mdia.platform.orderservice.repo.OutboxRepository;
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Scope;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -16,6 +20,7 @@ public class OutboxPublisherJob {
     private final OutboxRepository outbox;
     private final OutboxKafkaPublisher publisher;
     private final String ordersTopic;
+    private final Tracer tracer = GlobalOpenTelemetry.getTracer("order-service");
 
     public OutboxPublisherJob(
             OutboxRepository outbox,
@@ -30,10 +35,17 @@ public class OutboxPublisherJob {
     @Scheduled(fixedDelayString = "1000")
     @Transactional
     public void publishBatch() {
-        List<OutboxEvent> batch = outbox.findUnpublishedBatch();
-        for (OutboxEvent event: batch) {
-            publisher.publish(ordersTopic, event.getAggregateId().toString(), event.getPayload());
-            event.markPublished();
+        Span span = tracer.spanBuilder("outbox.publishBatch").startSpan();
+        try (Scope scope = span.makeCurrent()) {
+            List<OutboxEvent> batch = outbox.findUnpublishedBatch();
+            span.setAttribute("outbox.batchSize", batch.size());
+
+            for (OutboxEvent event: batch) {
+                publisher.publish(ordersTopic, event.getAggregateId().toString(), event.getPayload());
+                event.markPublished();
+            }
+        } finally {
+            span.end();
         }
     }
 }
