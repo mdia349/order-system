@@ -1,4 +1,4 @@
-
+```mermaid
 sequenceDiagram
     autonumber
     actor Client
@@ -26,3 +26,4 @@ sequenceDiagram
     Kafka-->>Inv: CONSUME orders.events
     Inv->>InvDB: INSERT processed_event (eventId) if not exists
     Inv->>InvDB: UPDATE inventory_item SET quantity = quantity - 1
+```
