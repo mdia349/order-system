@@ -102,8 +102,7 @@ services:
     container_name: jaeger
     ports:
       - "16686:16686"   # UI
-      - "4317:4317"     # OTLP gRPC (Jaeger can accept OTLP)
-      - "4318:4318"     # OTLP HTTP
+      - "14250:14250"   # gRPC for collector
     environment:
       - COLLECTOR_OTLP_ENABLED=true
 
@@ -112,11 +111,10 @@ services:
     container_name: otel-collector
     command: ["--config=/etc/otelcol/config.yaml"]
     volumes:
-      - ./infra/otel/otel-collector.yml:/etc/otelcol/config.yaml:ro
+      - ./infra/otel/otel-collector-config.yml:/etc/otelcol/config.yaml:ro
     ports:
-      - "9464:9464"     # Prometheus scrape endpoint (collector metrics/export)
-      - "4319:4317"     # OTLP gRPC in (we’ll point apps here)
-      - "4320:4318"     # OTLP HTTP in
+      - "4317:4317"
+      - "4318:4318"
     depends_on:
       - jaeger
 
