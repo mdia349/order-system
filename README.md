@@ -1,7 +1,5 @@
 #  Event-Driven Order Management System
 
----
-
 A production-style, event-driven microservices system built with Spring Boot, Kafka, PostgreSQL, and OpenTelemetry.
 
 **This project includes:**
@@ -17,8 +15,6 @@ A production-style, event-driven microservices system built with Spring Boot, Ka
 ---
 
 #  Architecture Overview
-
----
 
 ```
 Client
@@ -47,8 +43,6 @@ Order Service ──► Kafka ──► Inventory Service ──► Kafka ──
 
 #  Services
 
----
-
 ##  Auth Service
 - Issues JWT tokens
 - Secures service endpoints
@@ -76,8 +70,6 @@ Order Service ──► Kafka ──► Inventory Service ──► Kafka ──
 
 #  Event Flow (Current)
 
----
-
 1. Client places order
 2. Order Service:
    - Persists order
@@ -95,8 +87,6 @@ All services participate in a shared distributed trace visible in Jaeger.
 ---
 
 #  Observability
-
----
 
 ## Distributed Tracing
 
@@ -118,8 +108,6 @@ Examples:
 
 #  Running the Project
 
----
-
 ```bash
 docker compose up --build
 ```
@@ -134,8 +122,6 @@ docker compose up --build
 
 # Tech Stack
 
----
-
 - Java 21
 - Spring Boot
 - Kafka
@@ -149,8 +135,6 @@ docker compose up --build
 ---
 
 # Road Map
-
----
 
 - [ ] Saga choreography with order state transitions
 - [ ] Dead letter queue + retry
