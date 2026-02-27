@@ -9,7 +9,6 @@
   <packaging>pom</packaging>
 
   <modules>
-    <!-- we’ll add service modules here later -->
       <module>services/auth-service</module>
       <module>services/order-service</module>
       <module>services/inventory-service</module>

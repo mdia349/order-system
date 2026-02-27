@@ -10,7 +10,8 @@ scrape_configs:
     static_configs:
       - targets: ["otel-collector:9464"]
 
-  # We’ll add these once services exist:
+
+
   # - job_name: auth-service
   #   static_configs:
   #     - targets: ["auth-service:8080"]
