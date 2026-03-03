@@ -1,6 +1,6 @@
 package com.mdia.platform.orderservice.repo;
 
-import com.mdia.platform.orderservice.entity.OutboxEvent;
+import com.mdia.platform.orderservice.model.OutboxEvent;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

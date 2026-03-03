@@ -1,7 +1,8 @@
 package com.mdia.platform.orderservice.service;
 
-import com.mdia.platform.orderservice.entity.Order;
-import com.mdia.platform.orderservice.entity.OutboxEvent;
+import com.mdia.platform.orderservice.model.Order;
+import com.mdia.platform.orderservice.model.OrderStatus;
+import com.mdia.platform.orderservice.model.OutboxEvent;
 import com.mdia.platform.orderservice.repo.OrderRepository;
 import com.mdia.platform.orderservice.repo.OutboxRepository;
 import jakarta.transaction.Transactional;
@@ -28,7 +29,7 @@ public class OrderService {
     public Order createOrder(UUID userId) {
         UUID orderId = UUID.randomUUID();
 
-        Order order = new Order(orderId, userId, "CREATED");
+        Order order = new Order(orderId, userId, OrderStatus.CREATED);
         orderRepo.save(order);
 
         String payload;

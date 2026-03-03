@@ -1,6 +1,6 @@
 package com.mdia.platform.orderservice.controller;
 
-import com.mdia.platform.orderservice.entity.Order;
+import com.mdia.platform.orderservice.model.Order;
 import com.mdia.platform.orderservice.repo.OrderRepository;
 import com.mdia.platform.orderservice.service.OrderService;
 import org.springframework.security.core.Authentication;
