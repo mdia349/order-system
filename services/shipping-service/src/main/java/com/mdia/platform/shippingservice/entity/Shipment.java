@@ -1,9 +1,6 @@
 package com.mdia.platform.shippingservice.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -18,15 +15,16 @@ public class Shipment {
     @Column(name = "order_id", nullable = false)
     private UUID orderId;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String status;
+    private ShipmentStatus status;
 
     @Column(name = "created_at", nullable = false)
     private Instant createdAt = Instant.now();
 
     protected Shipment() {}
 
-    public Shipment(UUID id, UUID orderId, String status) {
+    public Shipment(UUID id, UUID orderId, ShipmentStatus status) {
         this.id = id;
         this.orderId = orderId;
         this.status = status;
@@ -34,5 +32,5 @@ public class Shipment {
 
     public UUID getId() {return id;}
     public UUID getOrderId() {return orderId;}
-    public String getStatus() {return status;}
+    public ShipmentStatus getStatus() {return status;}
 }

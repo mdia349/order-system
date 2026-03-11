@@ -3,6 +3,7 @@ package com.mdia.platform.shippingservice.consumer;
 import com.mdia.platform.shippingservice.entity.OutboxEvent;
 import com.mdia.platform.shippingservice.entity.ProcessedEvent;
 import com.mdia.platform.shippingservice.entity.Shipment;
+import com.mdia.platform.shippingservice.entity.ShipmentStatus;
 import com.mdia.platform.shippingservice.repo.OutboxRepository;
 import com.mdia.platform.shippingservice.repo.ProcessedEventRepository;
 import com.mdia.platform.shippingservice.repo.ShipmentRepository;
@@ -58,7 +59,7 @@ public class OrderEventsConsumer {
                 UUID orderId = UUID.fromString((String) evt.get("aggregateId"));
 
                 Shipment shipment = shipmentRepo.findByOrderId(orderId).orElseGet(() ->
-                        shipmentRepo.save(new Shipment(UUID.randomUUID(), orderId, "CREATED"))
+                        shipmentRepo.save(new Shipment(UUID.randomUUID(), orderId, ShipmentStatus.CREATED))
                 );
 
                 String shipmentPayload = mapper.writeValueAsString(Map.of(
@@ -68,7 +69,7 @@ public class OrderEventsConsumer {
                         "aggregateId", shipment.getId().toString(),
                         "data", Map.of(
                                 "orderId", orderId.toString(),
-                                "status", shipment.getStatus()
+                                "status", shipment.getStatus().name()
                         )
                 ));
 
