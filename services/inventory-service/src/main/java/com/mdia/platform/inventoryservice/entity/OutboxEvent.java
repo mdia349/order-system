@@ -1,4 +1,4 @@
-package com.mdia.platform.shippingservice.entity;
+package com.mdia.platform.inventoryservice.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -24,7 +24,7 @@ public class OutboxEvent {
     @Column(name = "event_type", nullable = false)
     private String eventType;
 
-    @Column(nullable = false)
+    @Column(columnDefinition = "jsonb", nullable = false)
     private String payload;
 
     @Column(name = "occurred_at", nullable = false)
@@ -32,6 +32,7 @@ public class OutboxEvent {
 
     @Column(name = "published_at")
     private Instant publishedAt;
+
 
     protected OutboxEvent() {}
 
@@ -50,9 +51,12 @@ public class OutboxEvent {
         this.occurredAt = occurredAt;
     }
 
-    public UUID getAggregateId() { return aggregateId; }
-    public String getPayload() { return payload; }
-    public Instant getPublishedAt() { return publishedAt; }
-    public void markPublished() { this.publishedAt = Instant.now(); }
+    public UUID getId() {return id;}
+    public String getEventType() {return eventType;}
+    public String getAggregateType() {return aggregateType;}
+    public UUID getAggregateId() {return aggregateId;}
+    public String getPayload() {return payload;}
+    public Instant getPublishedAt() {return publishedAt;}
+    public void markPublished() {this.publishedAt = Instant.now();}
 
 }

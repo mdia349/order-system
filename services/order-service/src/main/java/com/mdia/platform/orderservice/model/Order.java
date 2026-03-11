@@ -37,8 +37,23 @@ public class Order {
     public UUID getUserId() {return userId;}
     public OrderStatus getStatus() {return status;}
 
-    public void setStatus(OrderStatus status) {
-        this.status = status;
-        this.updatedAt = Instant.now();
+//    public void setStatus(OrderStatus status) {
+//        this.status = status;
+//        this.updatedAt = Instant.now();
+//    }
+
+    public void markInventoryReserved() {
+        if (this.status != OrderStatus.CREATED) {
+            throw new IllegalStateException("Invalid transition");
+        }
+        this.status = OrderStatus.INVENTORY_RESERVED;
     }
+
+    public void markCompleted() {
+        if (this.status != OrderStatus.INVENTORY_RESERVED) {
+            throw new IllegalStateException("Invalid transition");
+        }
+        this.status = OrderStatus.COMPLETED;
+    }
+
 }

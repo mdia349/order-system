@@ -41,13 +41,13 @@ public class OutboxEvent {
             UUID aggregateId,
             String eventType,
             String payload,
-            Instant occuredAt) {
+            Instant occurredAt) {
         this.id = id;
         this.aggregateType = aggregateType;
         this.aggregateId = aggregateId;
         this.eventType = eventType;
         this.payload = payload;
-        this.occurredAt = occuredAt;
+        this.occurredAt = occurredAt;
     }
 
     public UUID getId() {return id;}

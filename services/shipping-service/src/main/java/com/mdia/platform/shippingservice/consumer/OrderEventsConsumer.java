@@ -54,7 +54,7 @@ public class OrderEventsConsumer {
                 return;
             }
 
-            if ("OrderCreated".equals(eventType)) {
+            if ("InventoryReserved".equals(eventType)) {
                 UUID orderId = UUID.fromString((String) evt.get("aggregateId"));
 
                 Shipment shipment = shipmentRepo.findByOrderId(orderId).orElseGet(() ->

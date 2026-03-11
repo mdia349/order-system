@@ -20,3 +20,4 @@ app:
 
   kafka:
     ordersTopic: "orders.events"
+    shippingTopic: "shipments.events"

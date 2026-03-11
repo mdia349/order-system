@@ -1,8 +1,10 @@
 package com.mdia.platform.inventoryservice.consumer;
 
 import com.mdia.platform.inventoryservice.entity.InventoryItem;
+import com.mdia.platform.inventoryservice.entity.OutboxEvent;
 import com.mdia.platform.inventoryservice.entity.ProcessedEvent;
 import com.mdia.platform.inventoryservice.repo.InventoryRepository;
+import com.mdia.platform.inventoryservice.repo.OutboxRepository;
 import com.mdia.platform.inventoryservice.repo.ProcessedEventRepository;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -15,6 +17,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.ObjectMapper;
 
+import java.time.Instant;
 import java.util.Map;
 import java.util.UUID;
 
@@ -24,15 +27,18 @@ public class OrderEventsConsumer {
     private final ProcessedEventRepository processedRepo;
     private final ObjectMapper mapper = new ObjectMapper();
     private final InventoryRepository inventoryRepo;
+    private final OutboxRepository outboxRepository;
     private final Counter consumed;
     private final Counter deduped;
     private final Tracer tracer = GlobalOpenTelemetry.getTracer("inventory-service");
 
     public OrderEventsConsumer(ProcessedEventRepository processedRepo,
                                InventoryRepository inventoryRepo,
+                               OutboxRepository outboxRepository,
                                MeterRegistry registry) {
         this.processedRepo = processedRepo;
         this.inventoryRepo = inventoryRepo;
+        this.outboxRepository = outboxRepository;
         this.consumed = registry.counter("kafka_events_consumed_total", "service", "inventory-service");
         this.deduped = registry.counter("kafka_events_deduped_total", "service", "inventory-service");
     }
@@ -57,9 +63,34 @@ public class OrderEventsConsumer {
             String eventType = (String) evt.get("eventType");
             span.setAttribute("event.type", eventType);
             if ("OrderCreated".equals(eventType)) {
+
+                UUID orderId = UUID.fromString((String) evt.get("aggregateId"));
+
                 InventoryItem item = inventoryRepo.findById("SKU-CHAIR-1")
                         .orElseThrow(() -> new IllegalStateException("MISSING SKU-CHAIR-1 SEED DATA"));
                 item.decrement(1);
+
+                String inventoryReservedPayload = mapper.writeValueAsString(Map.of(
+                        "eventId", UUID.randomUUID().toString(),
+                        "eventType", "InventoryReserved",
+                        "aggregateType", "Order",
+                        "aggregateId", orderId.toString(),
+                        "occurredAt", Instant.now().toString(),
+                        "data", Map.of(
+                                "orderId", orderId.toString(),
+                                "status", "RESERVED"
+                        )
+                ));
+
+                OutboxEvent outboxEvent = new OutboxEvent(
+                        UUID.randomUUID(),
+                        "Inventory",
+                        orderId,
+                        "InventoryReserved",
+                        inventoryReservedPayload,
+                        Instant.now()
+                );
+                outboxRepository.save(outboxEvent);
             }
 
             processedRepo.save(new ProcessedEvent(eventId));
