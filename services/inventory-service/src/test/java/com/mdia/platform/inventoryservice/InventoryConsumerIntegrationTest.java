@@ -2,6 +2,7 @@ package com.mdia.platform.inventoryservice;
 
 import com.mdia.platform.inventoryservice.entity.InventoryItem;
 import com.mdia.platform.inventoryservice.repo.InventoryRepository;
+import com.mdia.platform.inventoryservice.repo.OutboxRepository;
 import com.mdia.platform.inventoryservice.repo.ProcessedEventRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,11 +59,14 @@ public class InventoryConsumerIntegrationTest {
     InventoryRepository inventoryRepo;
     @Autowired
     ProcessedEventRepository processedEventRepo;
+    @Autowired
+    OutboxRepository outboxRepo;
 
     private final ObjectMapper mapper = new ObjectMapper();
 
     @BeforeEach
     void setup() {
+        outboxRepo.deleteAll();
         processedEventRepo.deleteAll();
         inventoryRepo.deleteAll();
         inventoryRepo.save(new InventoryItem("SKU-CHAIR-1", 10));
@@ -90,6 +94,28 @@ public class InventoryConsumerIntegrationTest {
 
         int qty = inventoryRepo.findById("SKU-CHAIR-1").orElseThrow().getQuantity();
         assertThat(qty).isEqualTo(9);
+    }
+
+    @Test
+    void processesEvent_writesOutboxEvent() throws Exception {
+        UUID eventId = UUID.randomUUID();
+        String payload = payload(eventId);
+
+        kafkaTemplate.send("orders.events", "k1", payload);
+
+        waitUntil(() -> outboxRepo.count() > 0);
+
+        var outboxEvents = outboxRepo.findAll();
+        assertThat(outboxEvents).hasSize(1);
+        var event = outboxEvents.get(0);
+        assertThat(event.getEventType()).isEqualTo("InventoryReserved");
+        
+        Map<?, ?> outboxPayload = mapper.readValue(event.getPayload(), Map.class);
+        assertThat(outboxPayload.get("eventType")).isEqualTo("InventoryReserved");
+        assertThat(outboxPayload.get("aggregateType")).isEqualTo("Order");
+        
+        Map<?, ?> data = (Map<?, ?>) outboxPayload.get("data");
+        assertThat(data.get("status")).isEqualTo("RESERVED");
     }
 
     @Test

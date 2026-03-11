@@ -1,6 +1,6 @@
 package com.mdia.platform.orderservice.outbox;
 
-import com.mdia.platform.orderservice.entity.OutboxEvent;
+import com.mdia.platform.orderservice.model.OutboxEvent;
 import com.mdia.platform.orderservice.kafka.OutboxKafkaPublisher;
 import com.mdia.platform.orderservice.repo.OutboxRepository;
 import io.opentelemetry.api.GlobalOpenTelemetry;

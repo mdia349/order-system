@@ -1,4 +1,4 @@
-package com.mdia.platform.orderservice.entity;
+package com.mdia.platform.inventoryservice.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -33,6 +33,7 @@ public class OutboxEvent {
     @Column(name = "published_at")
     private Instant publishedAt;
 
+
     protected OutboxEvent() {}
 
     public OutboxEvent(
@@ -41,21 +42,21 @@ public class OutboxEvent {
             UUID aggregateId,
             String eventType,
             String payload,
-            Instant occuredAt) {
+            Instant occurredAt) {
         this.id = id;
         this.aggregateType = aggregateType;
         this.aggregateId = aggregateId;
         this.eventType = eventType;
         this.payload = payload;
-        this.occurredAt = occuredAt;
+        this.occurredAt = occurredAt;
     }
 
     public UUID getId() {return id;}
     public String getEventType() {return eventType;}
-    public String getPayload() {return payload;}
+    public String getAggregateType() {return aggregateType;}
     public UUID getAggregateId() {return aggregateId;}
+    public String getPayload() {return payload;}
     public Instant getPublishedAt() {return publishedAt;}
     public void markPublished() {this.publishedAt = Instant.now();}
-
 
 }

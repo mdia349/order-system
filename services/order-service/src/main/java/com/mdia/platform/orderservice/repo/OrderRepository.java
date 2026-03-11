@@ -1,6 +1,6 @@
 package com.mdia.platform.orderservice.repo;
 
-import com.mdia.platform.orderservice.entity.Order;
+import com.mdia.platform.orderservice.model.Order;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

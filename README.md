@@ -68,21 +68,13 @@ Order Service ──► Kafka ──► Inventory Service ──► Kafka ──
 
 ---
 
-#  Event Flow (Current)
+#  Event Flow (Saga Choreography)
 
-1. Client places order
-2. Order Service:
-   - Persists order
-   - Writes outbox event
-3. Kafka publishes `OrderCreated`
-4. Inventory Service:
-   - Reserves stock
-   - Emits `InventoryReserved`
-5. Shipping Service:
-   - Creates shipment
-   - Emits `ShipmentCreated`
-
-All services participate in a shared distributed trace visible in Jaeger.
+1. **Order Service**: Client places order. Persists order (CREATED) and `OrderCreated` outbox event.
+2. **Inventory Service**: Consumes `OrderCreated`. Reserves stock, persists `InventoryReserved` outbox event.
+3. **Order Service**: Consumes `InventoryReserved`. Updates order status to `INVENTORY_RESERVED`.
+4. **Shipping Service**: Consumes `OrderCreated` (Planned: `InventoryReserved`). Creates shipment, persists `ShipmentCreated` outbox event.
+5. **Order Service**: Consumes `ShipmentCreated`. Updates order status to `COMPLETED`.
 
 ---
 
@@ -93,7 +85,7 @@ All services participate in a shared distributed trace visible in Jaeger.
 - OpenTelemetry SDK in each service
 - Context propagation across Kafka
 - Traces visualized in Jaeger
-- Producer + consumer spans in same trace
+- Producer + consumer spans in same trace (Manual span creation in consumers)
 
 ## Metrics Pipeline
 
@@ -102,7 +94,7 @@ Services → OTel Collector → Prometheus → Grafana
 Examples:
 - HTTP request metrics
 - JVM memory usage
-- Custom business metrics (in progress)
+- Custom business metrics: `kafka_events_consumed_total`, `kafka_events_deduped_total` (Inventory Service)
 
 ---
 
@@ -122,8 +114,8 @@ docker compose up --build
 
 # Tech Stack
 
-- Java 21
-- Spring Boot
+- Java 17 (Services) / Java 21 (Docker)
+- Spring Boot 3.3.5 / 4.0.2
 - Kafka
 - PostgreSQL
 - OpenTelemetry
@@ -136,7 +128,10 @@ docker compose up --build
 
 # Road Map
 
-- [ ] Saga choreography with order state transitions
+- [x] Basic Event-driven communication
+- [x] Transactional Outbox pattern
+- [x] Distributed tracing with OpenTelemetry
+- [ ] Saga choreography refinement (Fixing event dependencies)
 - [ ] Dead letter queue + retry
 - [ ] Integration testing with Testcontainers
 - [ ] Kubernetes deployment
