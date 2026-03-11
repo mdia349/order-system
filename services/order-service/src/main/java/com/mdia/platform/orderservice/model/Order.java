@@ -47,6 +47,7 @@ public class Order {
             throw new IllegalStateException("Invalid transition");
         }
         this.status = OrderStatus.INVENTORY_RESERVED;
+        this.updatedAt = Instant.now();
     }
 
     public void markCompleted() {
@@ -54,6 +55,7 @@ public class Order {
             throw new IllegalStateException("Invalid transition");
         }
         this.status = OrderStatus.COMPLETED;
+        this.updatedAt = Instant.now();
     }
 
 }
